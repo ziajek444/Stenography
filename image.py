@@ -6,9 +6,10 @@ print("hello there")
 
 
 
-#img = Image.open('w3bw.bmp')
-img = Image.open('falkowicz.jpg')
+img = Image.open('w3bw.bmp')
+#img = Image.open('falkowicz.jpg')
 pixels = img.load()
+
 
 RED = (255,0,0)
 GREEN = (0,255,0)
@@ -53,7 +54,7 @@ for i in range(img.size[0]):
         else:
             pixels[i,j] = (r,g,b)            
 
-        
+
 print("hello there")
 img.show()
 img.close()

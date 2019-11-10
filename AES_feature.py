@@ -3,19 +3,20 @@
 # author: Marcin Ziajkowski
 import Cryptodome
 
+# from_string_to_SHA512
+import hashlib
+# AES_encode, AES_decode
+from Crypto.Cipher import AES
+
+
 
 def from_string_to_SHA512(key:str):
-    #from encodings.aliases import aliases 
-    import hashlib
     m = hashlib.sha512()
     res = bytes(key, 'utf-8') 
     m.update(res)
     return m.hexdigest()
     
 def AES_encode(sha512Key, textToEncode):
-    from Crypto.Cipher import AES
-    from Crypto.Random import get_random_bytes
-    
     data = bytes(textToEncode, 'utf-8')
     key = bytes(sha512Key, 'utf-8')[:16]
 
@@ -29,9 +30,6 @@ def AES_encode(sha512Key, textToEncode):
 
 
 def AES_decode(sha512Key, encoded_data):
-    from Crypto.Cipher import AES
-    from Crypto.Random import get_random_bytes
-
     key = bytes(sha512Key, 'utf-8')[:16]
     nonce = encoded_data[2]
     tag = encoded_data[1]
