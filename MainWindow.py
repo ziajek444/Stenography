@@ -100,12 +100,23 @@ class MyApp(App):
             ### download image to calculate ###
             new_img = PIL.Image.open(img_source.source, mode='r')
             new_img = new_img.transpose(method=PIL.Image.FLIP_TOP_BOTTOM)
+            # crypto #
+            messageToHide = textinput_text.text
+            sha_key = from_string_to_SHA512(textinput_key.text)
+            tag, nonce, messageToHide = AES_encode(sha_key, messageToHide)
+            print("tag: ",tag, "t tag: ", type(tag))
+            eko = str(tag)
+            print('eko: ',eko,'l eko: ',len(eko))
             # calculate #
-            new_img1 = HideText(new_img.copy(), "tajna wiadomosc")
+            new_img1 = HideText(new_img.copy(), messageToHide)
             # show #
             img_result1.texture = PIL_image_to_kivy_texture(new_img1)
 
-            ShowText(new_img1)
+            messageToShow = ShowText(new_img1)
+            sha_key = from_string_to_SHA512(textinput_key.text)
+            #messageToShow =
+            #textinput_text.text =
+
             # close all #
             new_img.close()
             new_img1.close()

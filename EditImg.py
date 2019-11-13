@@ -41,14 +41,14 @@ def add_one_to_best(img):
 
     for e1 in ExtraPixels[0]:
         (r, g, b) = pixels[e1[0], e1[1]]
-        pixels[e1[0], e1[1]] = (r+1, g, b)
+        pixels[e1[0], e1[1]] = (r, 0, 0)
     for e1 in ExtraPixels[1]:
         (r, g, b) = pixels[e1[0], e1[1]]
-        pixels[e1[0], e1[1]] = (r, g+1, b)
+        pixels[e1[0], e1[1]] = (0, g, 0)
     for e1 in ExtraPixels[2]:
         (r, g, b) = pixels[e1[0], e1[1]]
-        pixels[e1[0], e1[1]] = (r, g, b+1)
-    print(len(ExtraPixels[0]), len(ExtraPixels[1]), len(ExtraPixels[2]))
+        pixels[e1[0], e1[1]] = (0, 0, b)
+    #print(len(ExtraPixels[0]), len(ExtraPixels[1]), len(ExtraPixels[2]))
     return img
 
 
@@ -162,7 +162,11 @@ def HideText(img, text):
     # convert text to digital bits
     Text = ''
     for c in text:
-        e = str(bin(ord(c)))[2:]
+        if type(c) == str:
+            e = str(bin(ord(c)))[2:]
+        else:
+            e = str(bin(c))[2:]
+
         while len(e) < 8:
             e = '0' + e
         Text += e
