@@ -96,30 +96,34 @@ class MyApp(App):
 
         ## calculate steography ##
         def calculate_image():
-
             ### download image to calculate ###
             new_img = PIL.Image.open(img_source.source, mode='r')
-            new_img = new_img.transpose(method=PIL.Image.FLIP_TOP_BOTTOM)
+            #new_img = new_img.transpose(method=PIL.Image.FLIP_TOP_BOTTOM)
             # crypto #
             messageToHide = textinput_text.text
-            sha_key = from_string_to_SHA512(textinput_key.text)
+            assert len(messageToHide) > 0
+            key_string = textinput_key.text
+            assert len(key_string) > 0
+            sha_key = from_string_to_SHA512(key_string)
             tag, nonce, messageToHide = AES_encode(sha_key, messageToHide)
-            print("tag: ",tag, "t tag: ", type(tag))
-            eko = str(tag)
-            print('eko: ',eko,'l eko: ',len(eko))
+            encoded_data = (tag, nonce, messageToHide)
+            string_encoded_data = convert_encode_to_string(encoded_data)
             # calculate #
-            new_img1 = HideText(new_img.copy(), messageToHide)
+            encryptedImg = HideText(new_img.copy(), string_encoded_data)
             # show #
-            img_result1.texture = PIL_image_to_kivy_texture(new_img1)
+            img_result1.texture = PIL_image_to_kivy_texture(encryptedImg)
 
-            messageToShow = ShowText(new_img1)
-            sha_key = from_string_to_SHA512(textinput_key.text)
-            #messageToShow =
-            #textinput_text.text =
+            # decode
+            rawMessageToShow = ShowText(encryptedImg) # 16B/16B/xB
+            (tag_b, nonce_b, cripertext_b) = convert_string_to_encode(rawMessageToShow)
+            encoded_data = (tag_b, nonce_b, cripertext_b)
+            assert type(tag_b) == bytes
+            messageFromImg = AES_decode(sha_key, encoded_data)
+            textinput_sten.text = messageFromImg
 
             # close all #
             new_img.close()
-            new_img1.close()
+            encryptedImg.close()
         button_make.on_press = calculate_image
 
         ## change screen to filechooser ##

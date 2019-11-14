@@ -1,6 +1,7 @@
 # EditImg
 # Edit images
 # author: MArcin Ziajkowski
+#
 
 __author__ = 'Marcin Ziajkowski'
 
@@ -11,7 +12,7 @@ EI_GREEN = (0, 255, 0)
 EI_BLUE = (0, 0, 255)
 EI_BLACK = (0, 0, 0)
 EI_WHITE = (255, 255, 255)
-DEBUG = True
+DEBUG = False
 
 def findExtraPixels(in_pixels, imgX, imgY):
     ExtraPixelsR = []
@@ -101,9 +102,11 @@ def convert_number_to_32bits(number):
         binaryTextString = '0' + binaryTextString
     return binaryTextString
 
+
 def add_len_to_begin(MessageLength:int, imgLoadObj):
     # imgLoadObj is access to pixels
     pass
+
 
 def HideText(img, text):
     # convert text to bits and set length od text
@@ -172,6 +175,7 @@ def HideText(img, text):
         Text += e
     # amount of bits
     doWrite = len(Text)
+    assert doWrite == len(text) * 8
     indexText = 0
     # save main text to img
     bityWych = ''  # for debug
@@ -213,6 +217,117 @@ def HideText(img, text):
     return img
 
 
+def HideTextTEST(img, text):
+    # convert text to bits and set length od text
+    lengthOfText = len(text)
+    binaryTextString = str(bin(lengthOfText))[2:]
+    while len(binaryTextString) != 32:
+        binaryTextString = '0' + binaryTextString
+
+    # from (0,0) to (32,0) save size
+    # I can save 2bits per pixel
+    # to save 8B I need 64bits. 64/2 = 32pixels
+    # set on first 32 bit len of following text
+    pixels = img.load()
+    for i in range(16):
+        (r, g, b) = pixels[i, 0]
+        a1 = r & 1
+        a2 = g & 1
+        a3 = b & 1
+        x1 = int(binaryTextString[i*2])
+        x2 = int(binaryTextString[(i * 2) + 1])
+
+        if x1 == a1 ^ a3 and x2 == a2 ^ a3:
+            # no change
+            pass
+        elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
+            # change a1
+            r -= 1
+        elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
+            # change a2
+            g -= 1
+        elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
+            # change a3
+            b -= 1
+        else:
+            print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
+        pixels[i, 0] = (r, g, b)
+
+    # test whether bit are correct saved
+    bits = ""
+    for i in range(16):
+        (r, g, b) = pixels[i, 0]
+        a1 = r & 1
+        a2 = g & 1
+        a3 = b & 1
+        bits = bits + str(a1 ^ a3)
+        bits = bits + str(a2 ^ a3)
+    if (int(bits, 2) == lengthOfText):
+        if DEBUG: print("liczba zapisanych bitow zapis: ", bits)
+        pass
+    else:
+        raise 1
+
+    # main text hider
+    # go per pixels (per 3 Byte), save 2 bits per pixel
+    # start from 31th pixel
+    # convert text to digital bits
+    Text = ''
+    for c in text:
+        if type(c) == str:
+            e = str(bin(ord(c)))[2:]
+        else:
+            e = str(bin(c))[2:]
+
+        while len(e) < 8:
+            e = '0' + e
+        Text += e
+    # amount of bits
+    doWrite = len(Text)
+    assert doWrite == len(text) * 8
+    indexText = 0
+    # save main text to img
+    bityWych = ''  # for debug
+    for j in range(img.size[1]):
+        if doWrite == indexText:
+            break
+        for i in range(img.size[0]):
+            if not (i < 32 and j == 0):
+                (r, g, b) = pixels[i, j]
+                a1 = r & 1
+                a2 = g & 1
+                a3 = b & 1
+                x1 = int(Text[indexText])
+                indexText += 1
+                x2 = int(Text[indexText])
+                indexText += 1
+                if x1 == a1 ^ a3 and x2 == a2 ^ a3:
+                    # no change
+                    pass
+                elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
+                    # change a1
+                    r -= 1
+                elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
+                    # change a2
+                    g -= 1
+                elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
+                    # change a3
+                    b -= 1
+                else:
+                    print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
+                #pixels[i, j] = (r, g, b)
+                pixels[i, j] = (0, 0, 0)
+                if DEBUG:
+                    bityWych += str(r&1 ^ b&1)
+                    bityWych += str(g&1 ^ b&1)
+
+                if doWrite == indexText:
+                    break
+    if DEBUG: print("wiadomosc zapis: ", bityWych)
+    return img
+
+
+# read raw string from img
 def ShowText(img):
     pixels = img.load()
     bits = ""
@@ -253,6 +368,7 @@ def ShowText(img):
             znak = ''
 
     if DEBUG: print(text)
+    assert type(text) == str
     return text
 
 
@@ -260,7 +376,26 @@ def ShowText(img):
 ## zrobic bardziej modulowo
 
 if __name__ == "__main__":
-    text = 'abcdefgh'
-    digitsBinary = convert_text_to_bits(text)
-    for e in range(len(text)):
-        print(digitsBinary[e*8:e*8+8])
+    import PIL
+    from PIL import Image
+
+    # text = 'abcdefgh'
+    # digitsBinary = convert_text_to_bits(text)
+    # for e in range(len(text)):
+    #     print(digitsBinary[e*8:e*8+8])
+
+    # test image set all pixels
+    message = '1234567890' * 1000
+    test_img1 = PIL.Image.open('w3bw.bmp', mode='r')
+    test_img1.show()
+    test_img2 = HideText(test_img1.copy(), message)
+    test_img2.show()
+
+    # where pixels are saved
+    test_img3 = HideTextTEST(test_img1.copy(), message)
+    test_img3.show()
+
+    returnmessage = ShowText(test_img2.copy())
+    print(returnmessage == message)
+    assert returnmessage == message
+
