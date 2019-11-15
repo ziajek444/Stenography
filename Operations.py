@@ -4,6 +4,33 @@
 __author__ = 'Marcin Ziajkowski'
 
 from kivy.core.image import Texture
+from array import array
+
+def get_template_texture_buffer(size_x, size_y, case=0):
+    # config
+    template_texture = Texture.create(size=(size_x, size_y), colorfmt='rgb')
+    bufer_array = None
+    if case == 0:
+        size = size_x * size_y * 3
+        buf = [int(x * 255 / size) for x in range(size)]
+        bufer_array = array('B', buf)
+        template_texture.blit_buffer(bufer_array, colorfmt='rgb', bufferfmt='ubyte')
+    elif case == 1:
+        size = size_x * size_y * 3
+        buf = [int(x%255) for x in range(size)]
+        bufer_array = array('B', buf)
+        template_texture.blit_buffer(bufer_array, colorfmt='rgb', bufferfmt='ubyte')
+    elif case == 2:
+        size = size_x * size_y * 3
+        buf = [255 for x in range(size)]
+        bufer_array = array('B', buf)
+        template_texture.blit_buffer(bufer_array, colorfmt='rgb', bufferfmt='ubyte')
+    else:
+        raise 'Not implemented!'
+
+    assert bufer_array != None
+    return template_texture
+
 
 def horizontal_mirror_array(array, size_x = None, size_y = None):
     # [0, 0][0, 1][0, 2][0, 3]        [3, 0][3, 1][3, 2][3, 3]

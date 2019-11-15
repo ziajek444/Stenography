@@ -112,9 +112,9 @@ def HideText(img, text):
     # convert text to bits and set length od text
     lengthOfText = len(text)
     binaryTextString = str(bin(lengthOfText))[2:]
-    while len(binaryTextString) != 32:
+    while len(binaryTextString) < 32:
         binaryTextString = '0' + binaryTextString
-
+    assert len(binaryTextString) == 32
     # from (0,0) to (32,0) save size
     # I can save 2bits per pixel
     # to save 8B I need 64bits. 64/2 = 32pixels
@@ -133,13 +133,22 @@ def HideText(img, text):
             pass
         elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
             # change a1
-            r -= 1
+            if r > 0:
+                r -= 1
+            else:
+                r += 1
         elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
             # change a2
-            g -= 1
+            if g > 0:
+                g -= 1
+            else:
+                g += 1
         elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
             # change a3
-            b -= 1
+            if b > 0:
+                b -= 1
+            else:
+                b += 1
         else:
             print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
         pixels[i, 0] = (r, g, b)
@@ -197,13 +206,22 @@ def HideText(img, text):
                     pass
                 elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
                     # change a1
-                    r -= 1
+                    if r > 0:
+                        r -= 1
+                    else:
+                        r += 1
                 elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
                     # change a2
-                    g -= 1
+                    if g > 0:
+                        g -= 1
+                    else:
+                        g += 1
                 elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
                     # change a3
-                    b -= 1
+                    if b > 0:
+                        b -= 1
+                    else:
+                        b += 1
                 else:
                     print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
                 pixels[i, j] = (r, g, b)
@@ -217,7 +235,7 @@ def HideText(img, text):
     return img
 
 
-def HideTextTEST(img, text):
+def HideTextMASK(img, text):
     # convert text to bits and set length od text
     lengthOfText = len(text)
     binaryTextString = str(bin(lengthOfText))[2:]
@@ -242,13 +260,22 @@ def HideTextTEST(img, text):
             pass
         elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
             # change a1
-            r -= 1
+            if r > 0:
+                r -= 1
+            else:
+                r += 1
         elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
             # change a2
-            g -= 1
+            if g > 0:
+                g -= 1
+            else:
+                g += 1
         elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
             # change a3
-            b -= 1
+            if b > 0:
+                b -= 1
+            else:
+                b += 1
         else:
             print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
         pixels[i, 0] = (r, g, b)
@@ -293,37 +320,11 @@ def HideTextTEST(img, text):
             break
         for i in range(img.size[0]):
             if not (i < 32 and j == 0):
-                (r, g, b) = pixels[i, j]
-                a1 = r & 1
-                a2 = g & 1
-                a3 = b & 1
-                x1 = int(Text[indexText])
-                indexText += 1
-                x2 = int(Text[indexText])
-                indexText += 1
-                if x1 == a1 ^ a3 and x2 == a2 ^ a3:
-                    # no change
-                    pass
-                elif x1 != a1 ^ a3 and x2 == a2 ^ a3:
-                    # change a1
-                    r -= 1
-                elif x1 == a1 ^ a3 and x2 != a2 ^ a3:
-                    # change a2
-                    g -= 1
-                elif x1 != a1 ^ a3 and x2 != a2 ^ a3:
-                    # change a3
-                    b -= 1
-                else:
-                    print("!!!!!!!\n\nHARD ERROR !!!!!!!!! FATAL, ...\n\n!!!!!!!!")
-                #pixels[i, j] = (r, g, b)
+                indexText += 2
                 pixels[i, j] = (0, 0, 0)
-                if DEBUG:
-                    bityWych += str(r&1 ^ b&1)
-                    bityWych += str(g&1 ^ b&1)
 
                 if doWrite == indexText:
                     break
-    if DEBUG: print("wiadomosc zapis: ", bityWych)
     return img
 
 
@@ -386,13 +387,15 @@ if __name__ == "__main__":
 
     # test image set all pixels
     message = '1234567890' * 1000
-    test_img1 = PIL.Image.open('w3bw.bmp', mode='r')
+    #test_img1 = PIL.Image.open('w3bw.bmp', mode='r')
+    #test_img1 = PIL.Image.open('Jellyfish.jpg', mode='r')
+    test_img1 = PIL.Image.open('Hydrangeas.jpg', mode='r')
     test_img1.show()
     test_img2 = HideText(test_img1.copy(), message)
     test_img2.show()
 
     # where pixels are saved
-    test_img3 = HideTextTEST(test_img1.copy(), message)
+    test_img3 = HideTextMASK(test_img1.copy(), message)
     test_img3.show()
 
     returnmessage = ShowText(test_img2.copy())

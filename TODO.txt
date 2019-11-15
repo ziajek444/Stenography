@@ -1,0 +1,8 @@
+1. Fix change present list [optional]
+2. Add try:exept for reading .png files with 'rgba' ('rgb' onlu avalialbe) [important]
+3. Add read code from img [relevant]
+4. Remove auto decode and add instead verify [important]
+5. add algorithm for over coede message (3 with 5) [future]
+6. Add dispersion message [future]
+7. Add check file before calculation [can wait]
+8. Add algorithm for looking for best pixels [planned]
